@@ -1,33 +1,43 @@
+###############################################################
+# Docker Compose file for Jenkins CI/CD environment
+# Sets up Jenkins master and Docker-in-Docker (DinD) for building containers.
+# Maintainer: Vishal Patyal
+###############################################################
+
 version: '3.8'
 
+# Define a custom bridge network for Jenkins and Docker
 networks:
   jenkins-network:
     driver: bridge
 
+# Persistent volumes for Jenkins data and Docker certificates
 volumes:
   jenkins_home:
   docker_certs_ca:
   docker_certs_client:
 
 services:
+  # Docker-in-Docker service to provide Docker daemon for Jenkins
   docker-dind:
     image: docker:24-dind
     container_name: jenkins-docker
-    privileged: true
+    privileged: true  # Required for DinD to run Docker daemon
     networks:
       jenkins-network:
         aliases:
           - docker
     environment:
-      DOCKER_TLS_CERTDIR: /certs
+      DOCKER_TLS_CERTDIR: /certs  # Enable TLS for Docker daemon
     volumes:
-      - jenkins_home:/var/jenkins_home
-      - docker_certs_ca:/certs/ca
-      - docker_certs_client:/certs/client
+      - jenkins_home:/var/jenkins_home         # Share Jenkins home for Docker socket
+      - docker_certs_ca:/certs/ca              # CA certificates for Docker
+      - docker_certs_client:/certs/client      # Client certificates for Jenkins
     ports:
-      - "2376:2376"
-    command: --storage-driver overlay2
+      - "2376:2376"                           # Expose Docker daemon with TLS
+    command: --storage-driver overlay2         # Use overlay2 storage driver
 
+  # Jenkins master service, built from custom Dockerfile
   jenkins-server:
     build:
       context: .
@@ -37,19 +47,19 @@ services:
     networks:
       - jenkins-network
     environment:
-      DOCKER_HOST: tcp://docker:2376
-      DOCKER_CERT_PATH: /certs/client
-      DOCKER_TLS_VERIFY: 1
-      JENKINS_ADMIN_ID: admin
-      JENKINS_ADMIN_PASSWORD: ${JENKINS_ADMIN_PASSWORD:-admin123}
-      JENKINS_USER_ID: developer
-      JENKINS_USER_PASSWORD: ${JENKINS_USER_PASSWORD:-dev123}
+      DOCKER_HOST: tcp://docker:2376           # Point Jenkins to Docker daemon
+      DOCKER_CERT_PATH: /certs/client          # Path to Docker client certs
+      DOCKER_TLS_VERIFY: 1                     # Enforce TLS for Docker
+      JENKINS_ADMIN_ID: admin                  # Jenkins admin user
+      JENKINS_ADMIN_PASSWORD: ${JENKINS_ADMIN_PASSWORD:-admin123}  # Admin password
+      JENKINS_USER_ID: developer               # Jenkins developer user
+      JENKINS_USER_PASSWORD: ${JENKINS_USER_PASSWORD:-dev123}      # Developer password
     ports:
-      - "8080:8080"
-      - "50000:50000"
+      - "8080:8080"                           # Jenkins web UI
+      - "50000:50000"                         # Jenkins agent port
     volumes:
-      - jenkins_home:/var/jenkins_home
-      - docker_certs_client:/certs/client:ro
-      - ./casc.yaml:/var/jenkins_home/casc.yaml:ro
+      - jenkins_home:/var/jenkins_home         # Persist Jenkins data
+      - docker_certs_client:/certs/client:ro   # Mount Docker client certs read-only
+      - ./casc.yaml:/var/jenkins_home/casc.yaml:ro  # Mount JCasC config
     depends_on:
-      - docker-dind
+      - docker-dind                            # Ensure Docker is ready before Jenkins

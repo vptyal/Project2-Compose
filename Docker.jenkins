@@ -1,9 +1,15 @@
+###############################################################
+# Dockerfile for Jenkins Master with Docker CLI and Plugins
+# Builds a Jenkins image with required plugins and Docker CLI for CI/CD pipelines.
+# Maintainer: Vishal Patyal
+###############################################################
+
 FROM jenkins/jenkins:2.462.3-lts-jdk11
 
-# Switch to root user to install plugins and dependencies
+# Switch to root to install system dependencies and Docker CLI
 USER root
 
-# Install Docker CLI
+# Install Docker CLI for building and running Docker containers from Jenkins
 RUN apt-get update && apt-get install -y \
     apt-transport-https \
     ca-certificates \
@@ -16,15 +22,15 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y docker-ce-cli \
     && rm -rf /var/lib/apt/lists/*
 
-# Switch back to jenkins user
+# Switch back to Jenkins user for security
 USER jenkins
 
-# Copy plugin list and install plugins with dependency resolution
+# Copy plugin list and install plugins using Jenkins Plugin CLI
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt --verbose
 
-# Skip initial setup wizard
+# Disable Jenkins setup wizard for automated configuration
 ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false
 
-# Set environment variables for Configuration as Code
+# Set JCasC configuration file path for Jenkins Configuration as Code
 ENV CASC_JENKINS_CONFIG /var/jenkins_home/casc.yaml

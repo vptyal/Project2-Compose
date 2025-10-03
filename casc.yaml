@@ -1,9 +1,16 @@
+###############################################################
+# Jenkins Configuration as Code (JCasC) file
+# This file configures Jenkins using the Configuration as Code plugin.
+# Maintainer: Vishal Patyal
+###############################################################
 jenkins:
+  # Displayed on the Jenkins UI to indicate configuration source
   systemMessage: "Jenkins configured using Configuration as Code"
   
+  # Security realm defines user authentication (local users)
   securityRealm:
     local:
-      allowsSignup: false
+      allowsSignup: false  # Disables self-signup for users
       users:
         - id: "${JENKINS_ADMIN_ID}"
           name: "Administrator"
@@ -12,60 +19,66 @@ jenkins:
           name: "Developer"
           password: "${JENKINS_USER_PASSWORD}"
   
+  # Authorization strategy using Project Matrix for fine-grained permissions
   authorizationStrategy:
     projectMatrix:
       permissions:
-        - "Overall/Administer:admin"
-        - "Overall/Read:authenticated"
-        - "Job/Build:authenticated"
-        - "Job/Cancel:authenticated"
-        - "Job/Configure:admin"
-        - "Job/Create:admin"
-        - "Job/Delete:admin"
-        - "Job/Discover:authenticated"
-        - "Job/Read:authenticated"
-        - "Job/Workspace:authenticated"
-        - "Run/Delete:admin"
-        - "Run/Replay:authenticated"
-        - "Run/Update:authenticated"
-        - "View/Configure:admin"
-        - "View/Create:admin"
-        - "View/Delete:admin"
-        - "View/Read:authenticated"
-        - "SCM/Tag:authenticated"
+        - "Overall/Administer:admin"           # Full admin rights for admin
+        - "Overall/Read:authenticated"         # Read access for all authenticated users
+        - "Job/Build:authenticated"            # Allow builds for authenticated users
+        - "Job/Cancel:authenticated"           # Allow canceling builds
+        - "Job/Configure:admin"                # Job configuration for admin
+        - "Job/Create:admin"                   # Job creation for admin
+        - "Job/Delete:admin"                   # Job deletion for admin
+        - "Job/Discover:authenticated"         # Discover jobs for authenticated users
+        - "Job/Read:authenticated"             # Read jobs for authenticated users
+        - "Job/Workspace:authenticated"        # Workspace access for authenticated users
+        - "Run/Delete:admin"                   # Delete runs for admin
+        - "Run/Replay:authenticated"           # Replay runs for authenticated users
+        - "Run/Update:authenticated"           # Update runs for authenticated users
+        - "View/Configure:admin"               # Configure views for admin
+        - "View/Create:admin"                  # Create views for admin
+        - "View/Delete:admin"                  # Delete views for admin
+        - "View/Read:authenticated"            # Read views for authenticated users
+        - "SCM/Tag:authenticated"              # Tag in SCM for authenticated users
 
+  # Global environment variables for Jenkins nodes
   globalNodeProperties:
     - envVars:
         env:
           - key: "DOCKER_HOST"
-            value: "tcp://docker:2376"
+            value: "tcp://docker:2376"         # Docker daemon address
           - key: "DOCKER_TLS_VERIFY"
-            value: "1"
+            value: "1"                         # Enforce TLS for Docker
           - key: "DOCKER_CERT_PATH"
-            value: "/certs/client"
+            value: "/certs/client"             # Path to Docker client certificates
 
+###############################################################
+# Unclassified section for Jenkins global settings
+###############################################################
 unclassified:
   location:
-    url: "http://localhost:8080/"
-    adminAddress: "admin@localhost"
+    url: "http://localhost:8080/"              # Jenkins base URL
+    adminAddress: "admin@localhost"            # Admin contact email
 
+###############################################################
+# Tool installations for Jenkins pipelines
+###############################################################
 tool:
   nodejs:
     installations:
-      - name: "NodeJS-18"
+      - name: "NodeJS-18"                       # Node.js tool for pipelines
         properties:
           - installSource:
               installers:
                 - nodeJSInstaller:
-                    id: "18.17.0"
-                    npmPackagesRefreshHours: 72
-  
+                    id: "18.17.0"              # Node.js version
+                    npmPackagesRefreshHours: 72 # Refresh interval for npm packages
   git:
     installations:
-      - name: "Default"
+      - name: "Default"                         # Git tool for pipelines
         home: "git"
-
   dockerTool:
     installations:
-      - name: "Docker"
+      - name: "Docker"                          # Docker CLI for pipelines
         home: "/usr/bin/docker"

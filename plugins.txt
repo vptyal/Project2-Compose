@@ -1,12 +1,17 @@
-configuration-as-code:latest
-workflow-aggregator:latest
-docker-workflow:latest
-git:latest
-github:latest
-pipeline-stage-view:latest
-matrix-auth:latest
-blueocean:latest
-nodejs:latest
-junit:latest
-htmlpublisher:latest
-dependency-check-jenkins-plugin:latest
+###############################################################
+# Jenkins plugins to be installed at startup
+# Each line specifies a plugin and its version
+# Maintainer: Vishal Patyal
+###############################################################
+configuration-as-code:latest           # Enables Configuration as Code (JCasC)
+workflow-aggregator:latest             # Pipeline support
+docker-workflow:latest                 # Docker integration for pipelines
+git:latest                             # Git SCM support
+github:latest                          # GitHub integration
+pipeline-stage-view:latest             # Visual pipeline stage view
+matrix-auth:latest                     # Matrix-based security
+blueocean:latest                       # Modern Jenkins UI
+nodejs:latest                          # Node.js tool integration
+junit:latest                           # JUnit test reporting
+htmlpublisher:latest                   # Publish HTML reports
+dependency-check-jenkins-plugin:latest # Dependency vulnerability checks
