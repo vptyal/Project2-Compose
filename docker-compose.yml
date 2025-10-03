@@ -1,0 +1,55 @@
+version: '3.8'
+
+networks:
+  jenkins-network:
+    driver: bridge
+
+volumes:
+  jenkins_home:
+  docker_certs_ca:
+  docker_certs_client:
+
+services:
+  docker-dind:
+    image: docker:24-dind
+    container_name: jenkins-docker
+    privileged: true
+    networks:
+      jenkins-network:
+        aliases:
+          - docker
+    environment:
+      DOCKER_TLS_CERTDIR: /certs
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - docker_certs_ca:/certs/ca
+      - docker_certs_client:/certs/client
+    ports:
+      - "2376:2376"
+    command: --storage-driver overlay2
+
+  jenkins-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
+    container_name: jenkins-master
+    restart: on-failure
+    networks:
+      - jenkins-network
+    environment:
+      DOCKER_HOST: tcp://docker:2376
+      DOCKER_CERT_PATH: /certs/client
+      DOCKER_TLS_VERIFY: 1
+      JENKINS_ADMIN_ID: admin
+      JENKINS_ADMIN_PASSWORD: ${JENKINS_ADMIN_PASSWORD:-admin123}
+      JENKINS_USER_ID: developer
+      JENKINS_USER_PASSWORD: ${JENKINS_USER_PASSWORD:-dev123}
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - docker_certs_client:/certs/client:ro
+      - ./casc.yaml:/var/jenkins_home/casc.yaml:ro
+    depends_on:
+      - docker-dind

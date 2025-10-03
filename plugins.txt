@@ -1,0 +1,12 @@
+configuration-as-code:latest
+workflow-aggregator:latest
+docker-workflow:latest
+git:latest
+github:latest
+pipeline-stage-view:latest
+matrix-auth:latest
+blueocean:latest
+nodejs:latest
+junit:latest
+htmlpublisher:latest
+dependency-check-jenkins-plugin:latest

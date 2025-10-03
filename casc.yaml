@@ -1,0 +1,71 @@
+jenkins:
+  systemMessage: "Jenkins configured using Configuration as Code"
+  
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID}"
+          name: "Administrator"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+        - id: "${JENKINS_USER_ID}"
+          name: "Developer"
+          password: "${JENKINS_USER_PASSWORD}"
+  
+  authorizationStrategy:
+    projectMatrix:
+      permissions:
+        - "Overall/Administer:admin"
+        - "Overall/Read:authenticated"
+        - "Job/Build:authenticated"
+        - "Job/Cancel:authenticated"
+        - "Job/Configure:admin"
+        - "Job/Create:admin"
+        - "Job/Delete:admin"
+        - "Job/Discover:authenticated"
+        - "Job/Read:authenticated"
+        - "Job/Workspace:authenticated"
+        - "Run/Delete:admin"
+        - "Run/Replay:authenticated"
+        - "Run/Update:authenticated"
+        - "View/Configure:admin"
+        - "View/Create:admin"
+        - "View/Delete:admin"
+        - "View/Read:authenticated"
+        - "SCM/Tag:authenticated"
+
+  globalNodeProperties:
+    - envVars:
+        env:
+          - key: "DOCKER_HOST"
+            value: "tcp://docker:2376"
+          - key: "DOCKER_TLS_VERIFY"
+            value: "1"
+          - key: "DOCKER_CERT_PATH"
+            value: "/certs/client"
+
+unclassified:
+  location:
+    url: "http://localhost:8080/"
+    adminAddress: "admin@localhost"
+
+tool:
+  nodejs:
+    installations:
+      - name: "NodeJS-18"
+        properties:
+          - installSource:
+              installers:
+                - nodeJSInstaller:
+                    id: "18.17.0"
+                    npmPackagesRefreshHours: 72
+  
+  git:
+    installations:
+      - name: "Default"
+        home: "git"
+
+  dockerTool:
+    installations:
+      - name: "Docker"
+        home: "/usr/bin/docker"
